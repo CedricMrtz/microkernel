@@ -1,8 +1,10 @@
 package algorithms;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.ArrayList;
+import models.PCB;
+import models.State;
 
 public class RoundRobin {
     public int quantum;
