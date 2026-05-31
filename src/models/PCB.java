@@ -4,7 +4,7 @@ public class PCB {
     public final int    pid;
     public final String name;
     public State        state;
-    public int          burstTime;       // ráfaga de CPU restante (ticks)
+    public final int    burstTime;       // ráfaga de CPU restante (ticks)
     public final int    arrivalTime;     // tick de llegada
     public final int    priority;        // 1 = más alta
     public int          waitingTime;     // acumulado en estado READY
@@ -54,5 +54,63 @@ public class PCB {
             "PID: %d,\n Nombre: %s,\n Estado: %s,\n Prioridad: %d,\n Llegada: %d,\n Rafaga: %d,\n Restante: %d,\n Espera: %d,\n Fin: %d",
             pid, name, state, priority, arrivalTime, burstTime, remainingTime, waitingTime, turnaroundTime
         );
+    }
+
+    // Getters
+    public int getPid() {
+        return pid;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public State getState() {
+        return state;
+    }
+
+    public int getBurstTime() {
+        return burstTime;
+    }
+
+    public int getArrivalTime() {
+        return arrivalTime;
+    }
+
+    public int getPriority() {
+        return priority;
+    }
+
+    public int getWaitingTime() {
+        return waitingTime;
+    }
+
+    public int getTurnaroundTime() {
+        return turnaroundTime;
+    }
+
+    public int getRemainingTime() {
+        return remainingTime;
+    }
+
+    // Setters 
+    public void setWaitingTime(int waitingTime) {
+        this.waitingTime = waitingTime;
+    }
+
+    public void setTurnaroundTime(int turnaroundTime) {
+        this.turnaroundTime = turnaroundTime;
+    }
+
+    public void setRemainingTime(int remainingTime) {
+        this.remainingTime = remainingTime;
+    }
+
+    public void incrementWaitingTime() {
+        this.waitingTime++;
+    }
+
+    public void decrementRemainingTime() {
+        this.remainingTime--;
     }
 }
