@@ -1,10 +1,14 @@
 package kernel;
 
-import models.Semaphore; // Corregido de 'models' a 'model'
-import java.util.concurrent.atomic.AtomicInteger;
+import models.Semaphore;
 
 public class SyncManager {
-    private final AtomicInteger tickCounter = new AtomicInteger(0);
+
+    private int tickCounter = 0;
+
+    private synchronized int getNextTick() {
+        return ++tickCounter;
+    }
 
     public void runUnsynchronized(int N, int M, int K) {
         System.out.println("\nModo no sincronizado ");
@@ -63,7 +67,7 @@ public class SyncManager {
         System.out.println("\nModo sincronizado ");
 
         int[] buffer = new int[K];
-        int[] inOut = { 0, 0 }; // Corregido: faltaba punto y coma
+        int[] inOut = { 0, 0 };
         int[] count = { 0 };
         int[] itemCounter = { 1 };
 
@@ -72,7 +76,7 @@ public class SyncManager {
         Semaphore empty = new Semaphore(K);
 
         Runnable producer = () -> {
-            String name = Thread.currentThread().getName(); // Corregido: currentThread
+            String name = Thread.currentThread().getName();
             try {
                 while (true) {
                     empty.wait(name);
@@ -83,18 +87,18 @@ public class SyncManager {
                     inOut[0] = (inOut[0] + 1) % K;
                     count[0]++;
 
-                    int tick = tickCounter.incrementAndGet();
+                    int tick = getNextTick();
                     System.out.printf("[tick=%d] %s produce item #%d | buffer = %d/%d%n",
                             tick, name, item, count[0], K);
+
                     mutex.signal();
                     full.signal();
                     Thread.sleep(100);
                 }
             } catch (InterruptedException e) {
-            } // Corregido: limpieza de llaves
+            }
         };
 
-        // Corregido: Bloque expandido e indentado
         Runnable consumer = () -> {
             String name = Thread.currentThread().getName();
             try {
@@ -106,7 +110,7 @@ public class SyncManager {
                     inOut[1] = (inOut[1] + 1) % K;
                     count[0]--;
 
-                    int tick = tickCounter.incrementAndGet();
+                    int tick = getNextTick();
                     System.out.printf("[tick=%d] %s consume item #%d | buffer = %d/%d%n",
                             tick, name, item, count[0], K);
 
@@ -121,12 +125,12 @@ public class SyncManager {
         Thread[] prodThreads = new Thread[N];
         Thread[] consThreads = new Thread[M];
 
-        for (int i = 0; i < N; i++) { // Corregido: estructura del for
+        for (int i = 0; i < N; i++) {
             prodThreads[i] = new Thread(producer, "Productor-" + (i + 1));
             prodThreads[i].start();
         }
 
-        for (int i = 0; i < M; i++) { // Corregido: estructura del for
+        for (int i = 0; i < M; i++) {
             consThreads[i] = new Thread(consumer, "Consumidor-" + (i + 1));
             consThreads[i].start();
         }
