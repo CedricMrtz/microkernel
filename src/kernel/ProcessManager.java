@@ -1,11 +1,9 @@
 package kernel;
 
+import java.util.ArrayList;
+import java.util.List;
 import models.PCB;
 import models.State;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 public class ProcessManager {
     

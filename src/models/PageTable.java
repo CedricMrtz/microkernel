@@ -37,4 +37,22 @@ public class PageTable {
             throw new IllegalArgumentException("Número de página fuera de rango");
         }
     }
+
+    public int getNumPages() {
+        return frameMap.length;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("PageTable(pid=").append(pid).append(", frameMap=[");
+        for (int i = 0; i < frameMap.length; i++) {
+            sb.append(frameMap[i]);
+            if (i < frameMap.length - 1) {
+                sb.append(", ");
+            }
+        }
+        sb.append("])");
+        return sb.toString();
+    }
 }
