@@ -96,4 +96,15 @@ public class RoundRobin {
             }
         }
     }
+
+    public void removeFromQueues(PCB target) {
+        readyQueue.removeIf(p -> p.pid == target.pid);
+
+        if (running != null && running.pid == target.pid) {
+            running        = null;
+            quantumCounter = 0;
+        }
+
+        pending.removeIf(p -> p.pid == target.pid);
+    }
 }
