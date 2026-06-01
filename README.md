@@ -7,7 +7,7 @@ A small, modular microkernel framework in Java providing a minimal core runtime 
 classDiagram
   direction TB
 
-  namespace modelo {
+  namespace models {
     class State {
       <<enum>>
       NEW
@@ -18,14 +18,15 @@ classDiagram
     }
 
     class PCB {
-      +int pid
-      +String name
+      +final int pid
+      +final String name
       +State state
-      +int burstTime
-      +int arrivalTime
-      +int priority
+      +final int burstTime
+      +final int arrivalTime
+      +final int priority
       +int waitingTime
       +int turnaroundTime
+      +int remainingTime
       +PCB(pid, name, burstTime, arrivalTime, priority)
       +setState(State newState) void
       +toString() String
@@ -37,61 +38,14 @@ classDiagram
       +getPriority() int
       +getWaitingTime() int
       +getTurnaroundTime() int
-    }
-  }
-
-  namespace kernel {
-    class ProcessManager {
-      -List~PCB~ processList
-      -int nextPid
-      -MemoryManager memoryManager
-      +create(name, burst, priority) PCB
-      +terminate(pid) void
-      +getProcess(pid) PCB
-      +getAllProcesses() List~PCB~
+      +getRemainingTime() int
+      +setWaitingTime(int waitingTime) void
+      +setTurnaroundTime(int turnaroundTime) void
+      +setRemainingTime(int remainingTime) void
+      +incrementWaitingTime() void
+      +decrementRemainingTime() void
     }
 
-    class Scheduler {
-      -LinkedList~PCB~ readyQueue
-      -PCB runningProcess
-      -int currentTick
-      -int quantum
-      -int quantumCounter
-      -List~String~ ganttLog
-      -List~PCB~ finishedProcesses
-      -ProcessManager processManager
-      +run(quantum) void
-      +step() void
-      +getGanttLog() List~String~
-      +getFinishedProcesses() List~PCB~
-      +getCurrentTick() int
-    }
-
-    class SyncManager {
-      -int producers
-      -int consumers
-      -int bufferSize
-      -Semaphore mutex
-      -Semaphore full
-      -Semaphore empty
-      +runUnsynchronized(N, M, K) void
-      +runSynchronized(N, M, K) void
-    }
-
-    class MemoryManager {
-      -int PAGE_SIZE
-      -int NUM_FRAMES
-      -boolean[] frameMap
-      -Map~Integer,PageTable~ pageTables
-      -TLB tlb
-      +allocate(pid, numPages) boolean
-      +free(pid) void
-      +translate(pid, logicalAddr) int
-      +printStatus() void
-    }
-  }
-
-  namespace sincronizacion {
     class Semaphore {
       -int value
       -Queue~String~ waitingQueue
@@ -101,9 +55,73 @@ classDiagram
       +getValue() int
       +getWaitingThreads() String
     }
+
+    class PageTable {
+      +final int pid
+      -int[] frameMap
+      +PageTable(pid, numPages)
+      +getFrame(pageNumber) int
+      +map(pageNumber, frameNumber) void
+      +unmap(pageNumber) void
+      +getNumPages() int
+      +toString() String
+    }
   }
 
-  namespace memoria {
+  namespace kernel {
+    class ProcessManager {
+      -static final int maxProcesses
+      -static int defaultProcessPages
+      -List~PCB~ processList
+      -MemoryManager memoryManager
+      -int nextPid
+      +ProcessManager()
+      +ProcessManager(MemoryManager memoryManager)
+      +create(name, burst, priority) PCB
+      +create(name, burst, priority, numPages) PCB
+      +terminate(pid) void
+      +getProcess(pid) PCB
+      +getAllProcesses() List~PCB~
+      +printProcesses() void
+    }
+
+    class Scheduler {
+      -RoundRobin roundRobin
+      -GanttRenderer ganttRenderer
+      +Scheduler(quantum)
+      +run(processes) void
+      +CargarStep(processes) void
+      +Step() String
+      +isDone() boolean
+      +getReadyQueue() LinkedList~PCB~
+      +getTerminated() List~PCB~
+      +getGanttRenderer() GanttRenderer
+      +Kill(process) void
+    }
+
+    class SyncManager {
+      -int tickCounter
+      +runUnsynchronized(N, M, K) void
+      +runSynchronized(N, M, K) void
+    }
+
+    class MemoryManager {
+      +static final int PAGE_SIZE
+      +static final int NUM_FRAMES
+      +static final int TLB_SIZE
+      -boolean[] frameMap
+      -Map~Integer, PageTable~ pageTables
+      -TLB tlb
+      +MemoryManager()
+      +allocate(pid, numPages) boolean
+      +free(pid) void
+      +translate(pid, logicalAddr) int
+      +printStatus() void
+      +getPageTable(pid) PageTable
+      +getTlb() TLB
+      +countFreeFrames() int
+    }
+
     class TLB {
       -int size
       -int[][] entries
@@ -116,59 +134,74 @@ classDiagram
       +invalidate(pid) void
       +getHitRatio() double
       +printStats() void
-    }
-
-    class PageTable {
-      +int pid
-      -int[] frameMap
-      +PageTable(pid, numPages)
-      +getFrame(pageNumber) int
-      +map(pageNumber, frameNumber) void
-      +unmap(pageNumber) void
+      +getSize() int
+      +getHits() int
+      +getMisses() int
     }
   }
 
-  namespace presentacion {
+  namespace algorithms {
+    class RoundRobin {
+      +int quantum
+      +LinkedList~PCB~ readyQueue
+      -int currentTick
+      -int quantumCounter
+      -PCB running
+      -List~PCB~ terminados
+      -List~PCB~ pending
+      +RoundRobin(quantum)
+      +cargarProcesos(processes) void
+      +isDone() boolean
+      +tick() String
+      +getTerminatedProcesses() List~PCB~
+      +getCurrentTick() int
+      +removeFromQueues(target) void
+    }
+  }
+
+  namespace simulation {
     class GanttRenderer {
-      -List~String~ ganttLog
-      -List~PCB~ finishedProcesses
-      -int totalTicks
-      +GanttRenderer(ganttLog, finishedProcesses, totalTicks)
-      +printGantt() void
-      +printMetrics() void
-      +printCpuUtilization() void
+      -List~String~ timeline
+      +registrarTick(nombreProceso) void
+      +imprimir(terminados) void
+      +getAverageWaitingTime(terminados) double
+      +getAverageTurnaroundTime(terminados) double
+      +getCpuUtilization() double
     }
   }
 
   class Main {
-    -ProcessManager processManager
+    -static final int STEP_QUANTUM
+    -Scanner sc
+    -MemoryManager memory
+    -ProcessManager processes
+    -SyncManager sync
     -Scheduler scheduler
-    -SyncManager syncManager
-    -MemoryManager memoryManager
-    -GanttRenderer ganttRenderer
-    +runCommandLoop() void
+    +main(args) void
   }
 
-  %% ── Relaciones modelo ──
+  %% Relaciones models ──
   PCB --> State : usa
 
-  %% ── Relaciones kernel ──
+  %% Relaciones kernel ──
   ProcessManager o-- PCB : gestiona
   ProcessManager --> MemoryManager : usa
-  Scheduler o-- PCB : planifica
-  Scheduler --> ProcessManager : usa
+  ProcessManager --> State : consulta
+  Scheduler --> RoundRobin : delega
   Scheduler --> GanttRenderer : delega presentación
-  SyncManager *-- Semaphore : contiene
+  RoundRobin o-- PCB : planifica
+  SyncManager ..> Semaphore : usa
+  MemoryManager *-- TLB : contiene
+  MemoryManager *-- PageTable : contiene
 
-  %% ── Relaciones memoria ──
-  MemoryManager  *--  TLB : contiene
-  MemoryManager  *--  PageTable : contiene
+  %% Relaciones simulation ──
+  GanttRenderer --> PCB : resume métricas
 
-  %% ── Relaciones Main ──
+  %% Relaciones Main ──
   Main --> ProcessManager : instancia
   Main --> Scheduler : instancia
   Main --> SyncManager : instancia
   Main --> MemoryManager : instancia
-  Main --> GanttRenderer : instancia
+  Main --> State : filtra
 ```
 
