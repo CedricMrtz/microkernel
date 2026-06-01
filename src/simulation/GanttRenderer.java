@@ -54,7 +54,7 @@ public class GanttRenderer {
         System.out.println();
         System.out.printf("Promedio espera  : %.2f ticks%n", sumWT  / n);
         System.out.printf("Promedio retorno : %.2f ticks%n", sumTAT / n);
-        System.out.printf("CPU Utilization  : %.1f%%%n",     getCpuUtilization());
+        System.out.printf("CPU Utilization  : %.1f%%%n", getCpuUtilization());
     }
 
     public double getAverageWaitingTime(List<PCB> terminados) {

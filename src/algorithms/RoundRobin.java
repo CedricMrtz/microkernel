@@ -16,9 +16,9 @@ public class RoundRobin {
     private List<PCB> pending;
 
     public RoundRobin(int quantum) {
-        this.quantum      = quantum;
-        this.readyQueue   = new LinkedList<>();
-        this.currentTick  = 0;
+        this.quantum = quantum;
+        this.readyQueue = new LinkedList<>();
+        this.currentTick = 0;
         this.quantumCounter = 0;
         this.running = null;
         this.terminados = new ArrayList<>();
