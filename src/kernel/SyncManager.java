@@ -1,6 +1,6 @@
 package kernel;
 
-import models.Semaphore; // Corregido de 'models' a 'model'
+import models.Semaphore;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class SyncManager {
@@ -72,7 +72,7 @@ public class SyncManager {
         Semaphore empty = new Semaphore(K);
 
         Runnable producer = () -> {
-            String name = Thread.currentThread().getName(); // Corregido: currentThread
+            String name = Thread.currentThread().getName();
             try {
                 while (true) {
                     empty.wait(name);
@@ -91,10 +91,9 @@ public class SyncManager {
                     Thread.sleep(100);
                 }
             } catch (InterruptedException e) {
-            } // Corregido: limpieza de llaves
+            }
         };
 
-        // Corregido: Bloque expandido e indentado
         Runnable consumer = () -> {
             String name = Thread.currentThread().getName();
             try {
@@ -121,12 +120,12 @@ public class SyncManager {
         Thread[] prodThreads = new Thread[N];
         Thread[] consThreads = new Thread[M];
 
-        for (int i = 0; i < N; i++) { // Corregido: estructura del for
+        for (int i = 0; i < N; i++) {
             prodThreads[i] = new Thread(producer, "Productor-" + (i + 1));
             prodThreads[i].start();
         }
 
-        for (int i = 0; i < M; i++) { // Corregido: estructura del for
+        for (int i = 0; i < M; i++) {
             consThreads[i] = new Thread(consumer, "Consumidor-" + (i + 1));
             consThreads[i].start();
         }
