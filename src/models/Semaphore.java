@@ -26,11 +26,11 @@ public class Semaphore {
         this.notifyAll();
     }
 
-    public synchronized int getValue() {
+    public int getValue() {
         return value;
     }
 
-    public synchronized String getWaitingThreads() {
+    public String getWaitingThreads() {
         return waitingQueue.toString();
     }
 

@@ -38,18 +38,7 @@ public class RoundRobin {
 
         if (running != null) {
             boolean quantumAgotado = quantumCounter >= quantum;
-            boolean termino = running.remainingTime == 0;
-
-            if (termino) {
-                running.state = State.TERMINATED;
-                running.turnaroundTime = currentTick - running.arrivalTime;
-                running.waitingTime = running.turnaroundTime - running.burstTime;
-
-                terminados.add(running);
-                running = null;
-                quantumCounter = 0;
-
-            } else if (quantumAgotado) {
+            if (quantumAgotado) {
                 running.setState(State.READY);
                 readyQueue.add(running);
                 running = null;
@@ -67,6 +56,16 @@ public class RoundRobin {
         if (running != null) {
             running.remainingTime--;
             quantumCounter++;
+
+            if (running.remainingTime == 0) {
+                running.state = State.TERMINATED;
+                running.turnaroundTime = (currentTick + 1) - running.arrivalTime;
+                running.waitingTime = running.turnaroundTime - running.burstTime;
+
+                terminados.add(running);
+                running = null;
+                quantumCounter = 0;
+            }
         }
 
         for (PCB p : readyQueue) {
