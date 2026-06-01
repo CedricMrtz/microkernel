@@ -52,7 +52,7 @@ public class MemoryManager {
 
         // Liberar cada marco que tenia asignado el proceso
         int pagesFreed = 0;
-        for (int page = 0; page < NUM_FRAMES; page++) {
+        for (int page = 0; page < pt.getNumPages(); page++) {
             int frame = pt.getFrame(page);
             if (frame != -1) {
                 frameMap[frame] = false; 
@@ -139,7 +139,7 @@ public class MemoryManager {
     private int findFrameOwner(int frame) {
         for (Map.Entry<Integer, PageTable> entry : pageTables.entrySet()) {
             PageTable pt = entry.getValue();
-            for (int page = 0; page < NUM_FRAMES; page++) {
+            for (int page = 0; page < pt.getNumPages(); page++) {
                 if (pt.getFrame(page) == frame) {
                     return entry.getKey();
                 }
